@@ -1,13 +1,11 @@
 import abc
 
-import ujson as json
+import json
 from deeputil import keeprunning
 from logagg.util import DUMMY
 
 
-class BaseForwarder():
-    __metaclass__ = abc.ABCMeta
-
+class BaseForwarder(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(self):
         pass

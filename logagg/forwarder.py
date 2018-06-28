@@ -1,11 +1,11 @@
 import time
-import Queue
+import queue
 from threading import Thread
 from copy import deepcopy
 from multiprocessing.pool import ThreadPool
 
 from logagg import util
-import ujson as json
+import json
 
 
 class LogForwarder(object):
@@ -31,7 +31,7 @@ class LogForwarder(object):
 
         # Initialize a queue to carry messages between the
         # producer (nsq_reader) and the consumer (read_from_q)
-        self.msgqueue = Queue.Queue(maxsize=self.QUEUE_MAX_SIZE)
+        self.msgqueue = queue.Queue(maxsize=self.QUEUE_MAX_SIZE)
         self.log.info('created_Queue_object', size=(self.QUEUE_MAX_SIZE))
 
         # Starts the thread which we get the messages from queue
@@ -59,7 +59,7 @@ class LogForwarder(object):
                 msg = self.msgqueue.get(block=True, timeout=self.QUEUE_TIMEOUT)
                 msgs.append(msg)
 
-            except Queue.Empty:
+            except queue.Empty:
                 time.sleep(self.QUEUE_EMPTY_SLEEP_TIME)
                 continue
 

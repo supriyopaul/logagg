@@ -1,5 +1,5 @@
 import time
-import ujson as json
+import json
 
 import requests
 from deeputil import keeprunning

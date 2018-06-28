@@ -1,5 +1,5 @@
 import re
-import ujson as json
+import json
 import datetime
 
 class RawLog(dict): pass
@@ -110,7 +110,7 @@ def mongodb(line):
 
     keys = ['timestamp', 'severity', 'component', 'context', 'message']
     values = re.split(r'\s+', line, maxsplit=4)
-    mongodb_log = dict(zip(keys,values))
+    mongodb_log = dict(list(zip(keys,values)))
 
     return dict(
         timestamp=values[0],
@@ -269,7 +269,7 @@ def elasticsearch(line):
                 values[index] = float(num) * 1000
                 continue
 
-        data = dict(zip(keys,values))
+        data = dict(list(zip(keys,values)))
         if 'level' in data and data['level'][-1] == ' ':
             data['level'] = data['level'][:-1]
         if 'gc_count' in data:

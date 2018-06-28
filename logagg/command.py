@@ -3,6 +3,7 @@ from basescript import BaseScript
 from logagg.collector import LogCollector
 from logagg.forwarder import LogForwarder
 from logagg.nsqsender import NSQSender
+from logagg.service import LogaggService
 from logagg import util
 
 
@@ -42,12 +43,30 @@ class LogaggCommand(BaseScript):
         nsq_receiver = Reader(topic=self.args.nsqtopic,
                               channel=self.args.nsqchannel,
                               nsqd_tcp_addresses=[self.args.nsqd_tcp_address],
-                              max_in_flight=2500,)
+                              max_in_flight=200,)
 
         forwarder = LogForwarder(nsq_receiver,
                                  targets,
                                  self.log)
         forwarder.start()
+
+    def service(self):
+        '''
+        host=localhost:port=27017:user=some_user:password=xxxxx:db=logagg:collection=cluster_logs_and_metrics
+        '''
+        nsq_details = dict(topic=self.args.nsqtopic,
+                              channel=self.args.nsqchannel,
+                              nsqd_tcp_addresses=self.args.nsqd_tcp_address,
+                              max_in_flight=2500)
+
+        args = self.args.mongo.split(':')
+        mongo_details = dict(a.split('=') for a in args)
+
+        service = LogaggService(nsq_details,
+                                 mongo_details,
+                                 self.log)
+        service.start()
+
 
     def define_subcommands(self, subcommands):
         super(LogaggCommand, self).define_subcommands(subcommands)
@@ -98,6 +117,26 @@ class LogaggCommand(BaseScript):
             '-t', '--target', nargs='+', help='Target database and database details,'
             'format: "forwarder=<forwarder-classpath>:host=<hostname>:port=<port-number>:user=<user-name>:password=<password>:db=<database-name>:collection=<collection-name>",'
             'Ex: forwarder=logagg.forwarders.MongoDBForwarder:host=localhost:port=27017:user=some_user:password=xxxxx:db=logagg:collection=cluster_logs_and_metrics')
+
+        service_cmd = subcommands.add_parser('service',
+                                             help='Runs logagg service to expose\
+                                                     collected logs to an api')
+        service_cmd.set_defaults(func=self.service)
+        service_cmd.add_argument(
+            '--nsqtopic',
+            help='NSQ topic name to read messages from')
+        service_cmd.add_argument(
+            '--nsqchannel',
+            default='service',
+            help='NSQ channel name to read messages from, default: %(default)s')
+        service_cmd.add_argument(
+            '--nsqd-tcp-address',
+            default='localhost:4150',
+            help='nsqd tcp address where we get the messages')
+        service_cmd.add_argument(
+            '-m', '--mongo', help='Mongo database and database details,'
+            'format: "host=<hostname>:port=<port-number>:user=<user-name>:password=<password>:db=<database-name>:collection=<collection-name>",'
+            'Ex: host=localhost:port=27017:user=some_user:password=xxxxx:db=logagg:collection=cluster_logs_and_metrics')
 
 
 def main():

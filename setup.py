@@ -16,10 +16,10 @@ setup(
     install_requires=[
         "basescript==0.2.0",
         "pymongo==3.6.0",
-        "nsq-py==0.1.10",
+        "pynsq==0.8.2",
+        "tornado==4.5",
         "influxdb==4.1.1",
         "deeputil==0.2.5",
-        "ujson==1.35",
     ],
     package_dir={'logagg': 'logagg'},
     packages=find_packages('.'),

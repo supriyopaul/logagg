@@ -35,7 +35,7 @@ import traceback
 
 
 def log_exception(self, __fn__):
-    self.log.exception('error_during_run_Continuing', fn=__fn__.func_name,
+    self.log.exception('error_during_run_Continuing', fn=__fn__.__name__,
                        tb=repr(traceback.format_exc()))
 
 
@@ -57,7 +57,7 @@ def serialize_dict_keys(d, prefix=""):
     ['a', 'a.b', 'a.b.c', 'a.b.b']
     """
     keys = []
-    for k, v in d.iteritems():
+    for k, v in list(d.items()):
         fqk = '%s%s' % (prefix, k)
         keys.append(fqk)
         if isinstance(v, dict):

@@ -1,10 +1,10 @@
 import os
 import sys
 import time
-import ujson as json
+import json
 import glob
 import uuid
-import Queue
+import queue
 import socket
 import datetime
 from operator import attrgetter
@@ -45,18 +45,18 @@ class LogCollector(object):
     HEARTBEAT_RESTART_INTERVAL = 30 # Wait time if heartbeat sending stops
 
     LOG_STRUCTURE = {
-        'id': basestring,
-        'timestamp': basestring,
-        'file' : basestring,
-        'host': basestring,
-        'formatter' : basestring,
-        'raw' : basestring,
-        'type' : basestring,
-        'level' : basestring,
-        'event' : basestring,
+        'id': str,
+        'timestamp': str,
+        'file' : str,
+        'host': str,
+        'formatter' : str,
+        'raw' : str,
+        'type' : str,
+        'level' : str,
+        'event' : str,
         'data' : dict,
         'error' : bool,
-        'error_tb' : basestring,
+        'error_tb' : str,
     }
 
     def __init__(self,
@@ -73,7 +73,7 @@ class LogCollector(object):
         self.log_reader_threads = {}
         # Handle name to formatter fn obj map
         self.formatters = {}
-        self.queue = Queue.Queue(maxsize=self.QUEUE_MAX_SIZE)
+        self.queue = queue.Queue(maxsize=self.QUEUE_MAX_SIZE)
 
     def _remove_redundancy(self, log):
         """Removes duplicate data from 'data' inside log dict and brings it
@@ -292,7 +292,7 @@ class LogCollector(object):
                     break
                     # TODO: What if a single log message itself is bigger than max bytes limit?
 
-            except Queue.Empty:
+            except queue.Empty:
                 self.log.debug('queue_empty')
                 time.sleep(self.QUEUE_READ_TIMEOUT)
                 if not msgs:
@@ -379,7 +379,7 @@ class LogCollector(object):
         >>>     print('log file reader threads started:', lc.log_reader_threads)
         >>>     print('files bieng tracked:', state.files_tracked)
 
-        
+
         '''
         for f in self.fpaths:
             fpattern, formatter =(a.split('=')[1] for a in f.split(':', 1))
